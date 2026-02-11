@@ -18,7 +18,7 @@ const client = new Client({
 });
 
 // ================== AYARLAR ==================
-const KANAL_ADI = "➕-destek-oluştur";
+const KANAL_ADI = "『➕』destek-oluştur";
 const YETKILI_ROL_ADI = "Yetkili Ekip";
 const KATEGORI_ADI = "----------DESTEK SİSTEMİ----------";
 const SUNUCU_IP = "185.193.165.62";
