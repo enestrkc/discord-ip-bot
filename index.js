@@ -8,8 +8,6 @@ const client = new Client({
   ]
 });
 
-const TOKEN = process.env.TOKEN;
-
 client.once("ready", () => {
   console.log(`Bot giriş yaptı: ${client.user.tag}`);
 });
@@ -22,4 +20,4 @@ client.on("messageCreate", (message) => {
   }
 });
 
-client.login(TOKEN);
+client.login(process.env.TOKEN);
