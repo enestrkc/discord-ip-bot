@@ -8,20 +8,24 @@ const client = new Client({
   ]
 });
 
+// BOT AÇILDIĞINDA
 client.once("ready", () => {
   console.log(`Bot giriş yaptı: ${client.user.tag}`);
 });
 
+// KOMUT
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
   if (message.content === "!ip") {
-    message.channel.send("185.193.165.62");
+    message.reply("Sunucu IP: 1.1.1.1"); // burayı istersen değiştir
   }
 });
 
-client.login(process.env.TOKEN);
-
+// RAILWAY KAPATMASIN DİYE (ÇOK ÖNEMLİ)
 setInterval(() => {
   console.log("Bot ayakta...");
-}, 1000 * 60);
+}, 60000);
+
+// LOGIN (TOKEN ENV'DEN OKUNUR)
+client.login(process.env.TOKEN);
