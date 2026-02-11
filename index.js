@@ -21,3 +21,7 @@ client.on("messageCreate", (message) => {
 });
 
 client.login(process.env.TOKEN);
+
+setInterval(() => {
+  console.log("Bot ayakta...");
+}, 1000 * 60);
