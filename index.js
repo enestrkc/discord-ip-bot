@@ -18,7 +18,7 @@ client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
   if (message.content === "!ip") {
-    message.reply("Sunucu IP: 1.1.1.1"); // burayı istersen değiştir
+    message.reply("Sunucu IP: 185.193.165.62"); // burayı istersen değiştir
   }
 });
 
