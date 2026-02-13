@@ -13,7 +13,7 @@ const client = new Client({
 });
 
 
-// ==================== BOT READY ====================
+// ==================== READY ====================
 
 client.once("ready", () => {
   console.log(`${client.user.tag} aktif!`);
@@ -22,33 +22,30 @@ client.once("ready", () => {
 
 // ==================== IP KOMUTU ====================
 
-const SERVER_IP = "connect 185.193.165.62"; // örnek: play.sunucum.com
+const SERVER_IP = "connect 185.193.165.62"; // değiştir
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.guild) return;
 
-  if (message.content.toLowerCase() === "!ip") {
-    message.channel.send(`🌐 Sunucu IP: **${SERVER_IP}**`);
+  const mesaj = message.content.toLowerCase();
+
+  // !ip komutu
+  if (mesaj === "!ip") {
+    return message.channel.send(`🌐 Sunucu IP: **${SERVER_IP}**`);
   }
-});
 
+  // ==================== STEAM SERBEST ====================
 
-// ==================== REKLAM ENGELLEME ====================
+  if (mesaj.includes("steamcommunity.com/profiles/")) return;
 
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  if (!message.guild) return;
+  // ==================== REKLAM ENGEL ====================
 
   const reklamKelime = [
     "discord.gg/",
     "discord.com/invite/",
-    "http://",
-    "https://",
     ".gg/"
   ];
-
-  const mesaj = message.content.toLowerCase();
 
   if (reklamKelime.some(kelime => mesaj.includes(kelime))) {
 
@@ -58,15 +55,13 @@ client.on("messageCreate", async (message) => {
 
     message.channel.send(`🚫 ${message.author}, reklam yapmak yasak!`)
       .then(msg => {
-        setTimeout(() => {
-          msg.delete().catch(()=>{});
-        }, 5000);
+        setTimeout(() => msg.delete().catch(()=>{}), 5000);
       });
   }
 });
 
 
-// ==================== RAILWAY KAPANMASIN ====================
+// ==================== RAILWAY KEEP ALIVE ====================
 
 setInterval(() => {
   console.log("Bot ayakta...");
