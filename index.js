@@ -153,6 +153,13 @@ client.on("interactionCreate", async (interaction) => {
 setInterval(() => {
   console.log("Bot ayakta...");
 }, 60000);
+156  // 🔥 REKLAM ENGELLEME
+     (BURAYA YAPIŞTIR)
+
+...reklam kodu...
+
+// LOGIN
+client.login(process.env.TOKEN);
 
 // LOGIN
 client.login(process.env.TOKEN);
