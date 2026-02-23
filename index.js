@@ -22,4 +22,4 @@ client.on("messageCreate", (message) => {
   }
 });
 
-client.login("BOT_TOKEN");
+client.login("MTQ3MTE2Nzk1Njg0NjM3OTA5OQ.G-Q75Y.nO5IVCYLI5XgdmkoNg09-jIY06p6QweY0o2tIs");
