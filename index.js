@@ -8,9 +8,6 @@ const client = new Client({
   ],
 });
 
-const SERVER_IP = "185.193.165.62";
-const TOKEN = "BURAYA_BOT_TOKENINI_YAPISTIR";
-
 client.on("ready", () => {
   console.log(`${client.user.tag} aktif`);
 });
@@ -23,4 +20,5 @@ client.on("messageCreate", (message) => {
   }
 });
 
-client.login(TOKEN);
+// TOKENINI BURAYA YAPISTIR
+client.login(process.env.TOKEN);
