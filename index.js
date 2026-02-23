@@ -1,115 +1,45 @@
 const {
   Client,
   GatewayIntentBits,
+  Partials,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  PermissionsBitField,
-  ChannelType
+  PermissionsBitField
 } = require("discord.js");
+
+const TOKEN = process.env.TOKEN;
+const SERVER_IP = process.env.SERVER_IP;
+const STAFF_ROLE = process.env.STAFF_ROLE;
+const TICKET_CATEGORY = process.env.TICKET_CATEGORY;
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
-  ]
+  ],
+  partials: [Partials.Channel]
 });
 
-const SERVER_IP = process.env.SERVER_IP;
-const TICKET_CATEGORY = process.env.TICKET_CATEGORY;
-const STAFF_ROLE = process.env.STAFF_ROLE;
+const openTickets = new Set();
 
 client.once("ready", () => {
   console.log(`Bot aktif: ${client.user.tag}`);
 });
 
-client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isButton()) return;
-
-  // Ticket aç
-  if (interaction.customId === "ticket_ac") {
-    await interaction.deferReply({ ephemeral: true });
-
-    const existing = interaction.guild.channels.cache.find(
-      c => c.topic === interaction.user.id
-    );
-
-    if (existing) {
-      return interaction.editReply({
-        content: `Zaten açık bir destek talebin var: ${existing}`
-      });
-    }
-
-    const channel = await interaction.guild.channels.create({
-      name: `ticket-${interaction.user.username}`,
-      type: ChannelType.GuildText,
-      parent: TICKET_CATEGORY,
-      topic: interaction.user.id,
-      permissionOverwrites: [
-        {
-          id: interaction.guild.id,
-          deny: [PermissionsBitField.Flags.ViewChannel]
-        },
-        {
-          id: interaction.user.id,
-          allow: [
-            PermissionsBitField.Flags.ViewChannel,
-            PermissionsBitField.Flags.SendMessages,
-            PermissionsBitField.Flags.ReadMessageHistory
-          ]
-        },
-        {
-          id: STAFF_ROLE,
-          allow: [
-            PermissionsBitField.Flags.ViewChannel,
-            PermissionsBitField.Flags.SendMessages,
-            PermissionsBitField.Flags.ReadMessageHistory
-          ]
-        }
-      ]
-    });
-
-    const closeButton = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("ticket_kapat")
-        .setLabel("Destek Talebini Kapat")
-        .setStyle(ButtonStyle.Danger)
-    );
-
-    await channel.send({
-      content: `<@${interaction.user.id}> destek ekibi seninle ilgilenecek.`,
-      components: [closeButton]
-    });
-
-    interaction.editReply({
-      content: `Destek talebin oluşturuldu: ${channel}`
-    });
-  }
-
-  // Ticket kapat
-  if (interaction.customId === "ticket_kapat") {
-    await interaction.deferReply({ ephemeral: true });
-
-    await interaction.editReply({
-      content: "Ticket 5 saniye içinde kapanacak."
-    });
-
-    setTimeout(() => {
-      interaction.channel.delete().catch(() => {});
-    }, 5000);
-  }
-});
-
+// MESAJ KOMUTLARI
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
-  // IP komutu
+  // IP KOMUTU
   if (message.content === "!ip") {
-    message.reply(`🎮 CS2 Sunucu IP: **${SERVER_IP}**`);
+    message.reply(
+      `🎮 Sunucuya bağlanmak için:\n\`\`\`connect ${SERVER_IP}\`\`\``
+    );
   }
 
-  // Destek panel kur
+  // DESTEK PANELİ KUR
   if (message.content === "!destekkur") {
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -119,14 +49,98 @@ client.on("messageCreate", async (message) => {
     );
 
     message.channel.send({
-      embeds: [{
-        title: "Destek Sistemi",
-        description: "Destek talebi oluşturmak için aşağıdaki butona bas.",
-        color: 0x2ecc71
-      }],
+      embeds: [
+        {
+          title: "🎫 Destek Sistemi",
+          description:
+            "Destek talebi oluşturmak için aşağıdaki butona bas.",
+          color: 0x2ecc71
+        }
+      ],
       components: [row]
     });
   }
 });
 
-client.login(process.env.TOKEN);
+// BUTON OLAYI
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isButton()) return;
+
+  // TICKET AÇ
+  if (interaction.customId === "ticket_ac") {
+    if (openTickets.has(interaction.user.id)) {
+      return interaction.reply({
+        content: "Zaten açık bir destek talebin var.",
+        ephemeral: true
+      });
+    }
+
+    const guild = interaction.guild;
+
+    const channel = await guild.channels.create({
+      name: `ticket-${interaction.user.username}`,
+      type: 0,
+      parent: TICKET_CATEGORY,
+      permissionOverwrites: [
+        {
+          id: guild.id,
+          deny: [PermissionsBitField.Flags.ViewChannel]
+        },
+        {
+          id: interaction.user.id,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages
+          ]
+        },
+        {
+          id: STAFF_ROLE,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages
+          ]
+        }
+      ]
+    });
+
+    openTickets.add(interaction.user.id);
+
+    const closeRow = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("ticket_kapat")
+        .setLabel("Ticket Kapat")
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    channel.send({
+      content: `<@${interaction.user.id}> | <@&${STAFF_ROLE}>`,
+      embeds: [
+        {
+          title: "Destek Talebi",
+          description: "Yetkililer seninle ilgilenecek.",
+          color: 0x3498db
+        }
+      ],
+      components: [closeRow]
+    });
+
+    interaction.reply({
+      content: `Ticket açıldı: ${channel}`,
+      ephemeral: true
+    });
+  }
+
+  // TICKET KAPAT
+  if (interaction.customId === "ticket_kapat") {
+    const userId = interaction.channel.name.split("-")[1];
+    openTickets.delete(userId);
+
+    await interaction.reply("Ticket 5 saniye sonra kapanacak.");
+
+    setTimeout(() => {
+      interaction.channel.delete().catch(() => {});
+    }, 5000);
+  }
+});
+
+client.login(TOKEN);
