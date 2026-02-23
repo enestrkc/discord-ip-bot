@@ -1,7 +1,11 @@
 const { 
   Client, 
   GatewayIntentBits, 
-  PermissionsBitField 
+  ActionRowBuilder, 
+  ButtonBuilder, 
+  ButtonStyle, 
+  PermissionsBitField,
+  ChannelType
 } = require("discord.js");
 
 const client = new Client({
@@ -12,62 +16,117 @@ const client = new Client({
   ]
 });
 
+const TOKEN = "BOT_TOKEN";
+const TICKET_CATEGORY = "TICKET_KATEGORI_ID";
+const STAFF_ROLE = "YETKILI_ROL_ID";
 
-// ==================== READY ====================
+const SERVER_IP = "185.193.165.62"; // senin CS2 sunucu ip
 
 client.once("ready", () => {
-  console.log(`${client.user.tag} aktif!`);
+  console.log(`${client.user.tag} aktif`);
 });
 
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isButton()) return;
 
-// ==================== IP KOMUTU ====================
+  if (interaction.customId === "ticket_ac") {
+    await interaction.deferReply({ ephemeral: true });
 
-const SERVER_IP = "connect 185.193.165.62"; // değiştir
+    const existing = interaction.guild.channels.cache.find(
+      c => c.topic === interaction.user.id
+    );
+
+    if (existing) {
+      return interaction.editReply({
+        content: `Zaten açık bir destek talebin var: ${existing}`
+      });
+    }
+
+    const channel = await interaction.guild.channels.create({
+      name: `ticket-${interaction.user.username}`,
+      type: ChannelType.GuildText,
+      parent: TICKET_CATEGORY,
+      topic: interaction.user.id,
+      permissionOverwrites: [
+        {
+          id: interaction.guild.id,
+          deny: [PermissionsBitField.Flags.ViewChannel]
+        },
+        {
+          id: interaction.user.id,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ReadMessageHistory
+          ]
+        },
+        {
+          id: STAFF_ROLE,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ReadMessageHistory
+          ]
+        }
+      ]
+    });
+
+    const closeButton = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("ticket_kapat")
+        .setLabel("Destek Talebini Kapat")
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    await channel.send({
+      content: `<@${interaction.user.id}> destek ekibi seninle ilgilenecek.`,
+      components: [closeButton]
+    });
+
+    interaction.editReply({
+      content: `Destek talebin oluşturuldu: ${channel}`
+    });
+  }
+
+  if (interaction.customId === "ticket_kapat") {
+    await interaction.deferReply({ ephemeral: true });
+
+    await interaction.editReply({
+      content: "Ticket 5 saniye içinde kapanacak."
+    });
+
+    setTimeout(() => {
+      interaction.channel.delete();
+    }, 5000);
+  }
+});
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  if (!message.guild) return;
 
-  const mesaj = message.content.toLowerCase();
-
-  // !ip komutu
-  if (mesaj === "!ip") {
-    return message.channel.send(`🌐 Sunucu IP: **${SERVER_IP}**`);
+  // IP komutu
+  if (message.content === "!ip") {
+    message.reply(`🎮 CS2 Sunucu IP: **${SERVER_IP}**`);
   }
 
-  // ==================== STEAM SERBEST ====================
+  // Destek panel kurma
+  if (message.content === "!destekkur") {
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("ticket_ac")
+        .setLabel("Destek Oluştur")
+        .setStyle(ButtonStyle.Success)
+    );
 
-  if (mesaj.includes("steamcommunity.com/profiles/")) return;
-
-  // ==================== REKLAM ENGEL ====================
-
-  const reklamKelime = [
-    "discord.gg/",
-    "discord.com/invite/",
-    ".gg/"
-  ];
-
-  if (reklamKelime.some(kelime => mesaj.includes(kelime))) {
-
-    if (message.member.permissions.has(PermissionsBitField.Flags.Administrator)) return;
-
-    await message.delete().catch(() => {});
-
-    message.channel.send(`🚫 ${message.author}, reklam yapmak yasak!`)
-      .then(msg => {
-        setTimeout(() => msg.delete().catch(()=>{}), 5000);
-      });
+    message.channel.send({
+      embeds: [{
+        title: "Destek Sistemi",
+        description: "Destek talebi oluşturmak için aşağıdaki butona bas.",
+        color: 0x2ecc71
+      }],
+      components: [row]
+    });
   }
 });
 
-
-// ==================== RAILWAY KEEP ALIVE ====================
-
-setInterval(() => {
-  console.log("Bot ayakta...");
-}, 60000);
-
-
-// ==================== LOGIN ====================
-
-client.login(process.env.TOKEN);
+client.login(TOKEN);
