@@ -1,9 +1,9 @@
-const { 
-  Client, 
-  GatewayIntentBits, 
-  ActionRowBuilder, 
-  ButtonBuilder, 
-  ButtonStyle, 
+const {
+  Client,
+  GatewayIntentBits,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   PermissionsBitField,
   ChannelType
 } = require("discord.js");
@@ -16,19 +16,18 @@ const client = new Client({
   ]
 });
 
-const TOKEN = "BOT_TOKEN";
-const TICKET_CATEGORY = "TICKET_KATEGORI_ID";
-const STAFF_ROLE = "YETKILI_ROL_ID";
-
-const SERVER_IP = "185.193.165.62"; // senin CS2 sunucu ip
+const SERVER_IP = process.env.SERVER_IP;
+const TICKET_CATEGORY = process.env.TICKET_CATEGORY;
+const STAFF_ROLE = process.env.STAFF_ROLE;
 
 client.once("ready", () => {
-  console.log(`${client.user.tag} aktif`);
+  console.log(`Bot aktif: ${client.user.tag}`);
 });
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isButton()) return;
 
+  // Ticket aç
   if (interaction.customId === "ticket_ac") {
     await interaction.deferReply({ ephemeral: true });
 
@@ -88,6 +87,7 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
+  // Ticket kapat
   if (interaction.customId === "ticket_kapat") {
     await interaction.deferReply({ ephemeral: true });
 
@@ -96,7 +96,7 @@ client.on("interactionCreate", async (interaction) => {
     });
 
     setTimeout(() => {
-      interaction.channel.delete();
+      interaction.channel.delete().catch(() => {});
     }, 5000);
   }
 });
@@ -109,7 +109,7 @@ client.on("messageCreate", async (message) => {
     message.reply(`🎮 CS2 Sunucu IP: **${SERVER_IP}**`);
   }
 
-  // Destek panel kurma
+  // Destek panel kur
   if (message.content === "!destekkur") {
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -129,4 +129,4 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-client.login(TOKEN);
+client.login(process.env.TOKEN);
