@@ -19,7 +19,7 @@ client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
   if (message.content === "!ip") {
-    message.channel.send(`connect ${185.193.165.62}`);
+    message.channel.send("connect 185.193.165.62");
   }
 });
 
