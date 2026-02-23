@@ -35,7 +35,7 @@ client.on("messageCreate", async (message) => {
   // IP KOMUTU
   if (message.content === "!ip") {
     message.reply(
-      `🎮 Sunucuya bağlanmak için:\n\`\`\`connect ${SERVER_IP}\`\`\``
+      `🎮 Sunucuya bağlanmak için:\n\`\`\`connect ${185.193.165.62}\`\`\``
     );
   }
 
