@@ -20,5 +20,4 @@ client.on("messageCreate", (message) => {
   }
 });
 
-// TOKENINI BURAYA YAPISTIR
 client.login(process.env.TOKEN);
