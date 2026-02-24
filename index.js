@@ -11,13 +11,13 @@ const client = new Client({
 const TOKEN = process.env.TOKEN;
 
 client.once("ready", () => {
-  console.log(`Bot aktif: ${client.user.tag}`);
+  console.log("Bot aktif:", client.user.tag);
 });
 
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
-  if (message.content.toLowerCase() === "!ip") {
+  if (message.content.toLowerCase().startsWith("!ip")) {
     message.channel.send("connect 185.193.165.62");
   }
 });
