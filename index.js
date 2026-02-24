@@ -5,19 +5,22 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
-  ],
+  ]
 });
 
-client.on("ready", () => {
-  console.log(`${client.user.tag} aktif`);
+// TOKEN Railway'de eklenecek
+const TOKEN = process.env.TOKEN;
+
+client.once("ready", () => {
+  console.log(`Bot aktif: ${client.user.tag}`);
 });
 
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
-  if (message.content === "!ip") {
+  if (message.content.toLowerCase() === "!ip") {
     message.channel.send("connect 185.193.165.62");
   }
 });
 
-client.login(process.env.TOKEN);
+client.login(TOKEN);
