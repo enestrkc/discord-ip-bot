@@ -8,7 +8,6 @@ const client = new Client({
   ]
 });
 
-// TOKEN Railway'de eklenecek
 const TOKEN = process.env.TOKEN;
 
 client.once("ready", () => {
